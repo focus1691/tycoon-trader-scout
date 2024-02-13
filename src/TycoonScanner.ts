@@ -1,4 +1,5 @@
 import { from, map, toArray } from 'rxjs'
+import { CacheService } from './redis'
 import { FilterTraderConfig, LeaderHistory, TraderInfo, TraderPerformance, TraderStatistics } from './types'
 import { fetchLeaderboard, fetchTraderHistory, fetchTraderPerformance, fetchTraderStatistics, filterKRatio } from './utils'
 import regression from 'regression'
@@ -37,12 +38,14 @@ function calculateKRatio(cumulativeReturns: number[]): number {
 
 export default class TycoonScanner {
   private tradersMap: Map<string, TraderInfo> = new Map<string, TraderInfo>()
+  private cacheService = new CacheService()
   private config: FilterTraderConfig = {
-    numOfTraders: 10,
-    kRatio: 100
+    limit: 10,
+    minKRatio: 100
   }
 
   public async init() {
+    await this.cacheService.connect()
     await this.scanTycoonTraders()
     this.debug()
   }
@@ -88,10 +91,10 @@ export default class TycoonScanner {
   public filterTopPerformers(): void {
     from(Array.from(this.tradersMap.values()))
       .pipe(
-        filterKRatio(this.config.kRatio),
+        filterKRatio(this.config.minKRatio),
         toArray(),
         map((traders) => traders.sort((a, b) => b.computedStats.kRatio - a.computedStats.kRatio)),
-        map((traders) => traders.slice(0, this.config.numOfTraders))
+        map((traders) => traders.slice(0, this.config.limit))
       )
       .subscribe((topTraders) => {
         console.log(topTraders)

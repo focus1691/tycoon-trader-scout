@@ -1,4 +1,4 @@
 export interface FilterTraderConfig {
-  numOfTraders: number
-  kRatio: number
+  limit: number
+  minKRatio: number
 }

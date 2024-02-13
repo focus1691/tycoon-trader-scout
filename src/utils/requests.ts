@@ -1,4 +1,3 @@
-import { TYCOON_ACCESS_TOKEN } from '../secrets'
 import { BASE_URL } from '../config'
 import { LeaderboardResponse, LeaderHistory, TraderPerformance, TraderStatistics } from '../types'
 
@@ -9,7 +8,7 @@ export async function fetchLeaderboard(): Promise<string[]> {
   const response = await fetch(url, {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${TYCOON_ACCESS_TOKEN}`,
+      Authorization: `Bearer ${process.env.TYCOON_ACCESS_TOKEN}`,
       'Content-Type': 'application/json'
     }
   })
