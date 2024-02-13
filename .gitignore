@@ -37,3 +37,6 @@ lerna-debug.log*
 
 # Environmental variables
 .env
+
+# Secrets
+/src/secrets/*

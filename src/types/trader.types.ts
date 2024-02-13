@@ -1,52 +1,8 @@
-export interface TraderPerformance {
-  name: string
-  value: number
-}
+import { LeaderHistory, TraderPerformance, TraderStatistics } from '.'
 
-export interface TraderStatistics {
-  totalTrades: number
-  profitableDays: number
-  highestTradeROI: number
-  highestTradePNL: number
-  tradesPerDay: number
-  winRatio: number
-  avgTradingSize: number
-  avgTradeDuration: number
-  biggestTradeLoss: number
-}
-
-export interface LeaderTrade {
-  symbol: string
-  amount: number
-  leverage: number
-  entryPrice: number
-  markPrice: number
-  pnl: number
-  roe: number
-  days: number
-  openTime: string
-  closeTime: string | null
-  leaderTradeStatus: string
-  side: string
-}
-
-export interface MergedPosition {
+export interface TraderInfo {
   id: string
-  symbol: string
-  amount: number
-  leverage: number
-  entryPrice: number
-  markPrice: number
-  pnl: number
-  roe: number
-  days: number
-  openTime: string
-  closeTime: string
-  tradeHistoryList: LeaderTrade[]
-  isLong: boolean
-}
-
-export interface LeaderHistory {
-  mergedPositionsData: MergedPosition[]
-  records: number
+  performance: TraderPerformance[]
+  statistics: TraderStatistics
+  history: LeaderHistory
 }
