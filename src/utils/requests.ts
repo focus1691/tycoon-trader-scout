@@ -21,23 +21,20 @@ export async function fetchLeaderboard(): Promise<string[]> {
 // Fetch and return trader performance by ID
 export async function fetchTraderPerformance(id: string): Promise<TraderPerformance[]> {
   const url = `${BASE_URL}/LeaderboardApi/GetLeaderPerformance?leaderId=${id}&statisticType=PNL`
-  // Your fetch function here
-  const response = await fetch(url) // Replace fetch with your HTTP client
+  const response = await fetch(url)
   return response.json()
 }
 
 // Fetch and return trader statistics by ID
 export async function fetchTraderStatistics(id: string): Promise<TraderStatistics> {
   const url = `${BASE_URL}/LeaderboardApi/GetLeaderStatistics?leaderId=${id}`
-  // Your fetch function here
-  const response = await fetch(url) // Replace fetch with your HTTP client
+  const response = await fetch(url)
   return response.json()
 }
 
 // Fetch and return trader history by ID
 export async function fetchTraderHistory(id: string): Promise<LeaderHistory> {
   const url = `${BASE_URL}/LeaderboardApi/GetLeaderHistory?leaderId=${id}&skipRecords=0&takeRecords=10`
-  // Your fetch function here
-  const response = await fetch(url) // Replace fetch with your HTTP client
+  const response = await fetch(url)
   return response.json()
 }

@@ -1,11 +1,11 @@
 import { from, map, toArray } from 'rxjs'
 import { FilterTraderConfig, LeaderHistory, TraderInfo, TraderPerformance, TraderStatistics } from './types'
 import { fetchLeaderboard, fetchTraderHistory, fetchTraderPerformance, fetchTraderStatistics, filterKRatio } from './utils'
-import regression, { DataPoint } from 'regression'
+import regression from 'regression'
 
 function calculateKRatio(cumulativeReturns: number[]): number {
-  // Correctly type the data as an array of DataPoint (which is [number, number])
-  const data: DataPoint[] = cumulativeReturns.map((value, index): DataPoint => [index + 1, value])
+  // Correctly type the data as an array of DataPoint
+  const data: [number, number][] = cumulativeReturns.map((value, index): [number, number] => [index + 1, value])
 
   // Perform linear regression
   const result = regression.linear(data)
@@ -13,13 +13,24 @@ function calculateKRatio(cumulativeReturns: number[]): number {
   // Extract the slope (growth rate) from the equation
   const slope = result.equation[0]
 
-  // Here, we're lacking a direct method to calculate standard error from the regression library's result
-  // As an alternative, consider focusing on the slope or the r2 property for the quality of fit
-  // If you need the standard error, you'll need to calculate it manually based on regression residuals
+  // Calculate predicted values and residuals
+  const n = data.length
+  const meanX = (n + 1) / 2 // Mean of x, since x is just 1, 2, ..., n
+  let sumResidualsSquared = 0
+  let sumVarianceX = 0
 
-  // Temporarily, let's use the slope as our metric (you may want to adjust this based on your requirements)
-  // Note: This is a placeholder solution. You should implement a proper standard error calculation if needed.
-  const kRatio = slope // Placeholder, not an actual K-Ratio calculation without the standard error
+  data.forEach(([x, y]) => {
+    const predictedY = result.predict(x)[1]
+    const residual = y - predictedY
+    sumResidualsSquared += residual ** 2
+    sumVarianceX += (x - meanX) ** 2
+  })
+
+  // Calculate standard error of the slope
+  const standardError = Math.sqrt(sumResidualsSquared / (n - 2) / sumVarianceX)
+
+  // Calculate K-Ratio as slope / standard error of the slope
+  const kRatio = slope / standardError
 
   return kRatio
 }
