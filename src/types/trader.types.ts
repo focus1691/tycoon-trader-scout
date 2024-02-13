@@ -5,4 +5,9 @@ export interface TraderInfo {
   performance: TraderPerformance[]
   statistics: TraderStatistics
   history: LeaderHistory
+  computedStats: QuantStats
+}
+
+export type QuantStats = {
+  kRatio: number
 }

@@ -28,6 +28,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.17",
+    "@types/regression": "^2.0.6",
     "@typescript-eslint/eslint-plugin": "^7.0.1",
     "@typescript-eslint/parser": "^7.0.1",
     "eslint": "^8.56.0",
@@ -42,6 +43,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "dotenv": "^16.4.3"
+    "dotenv": "^16.4.3",
+    "regression": "^2.0.1"
   }
 }
