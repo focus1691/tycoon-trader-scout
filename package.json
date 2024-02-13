@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.3",
-    "regression": "^2.0.1"
+    "regression": "^2.0.1",
+    "rxjs": "^7.8.1"
   }
 }

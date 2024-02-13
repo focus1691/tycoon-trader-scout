@@ -1,5 +1,6 @@
-import { LeaderHistory, TraderInfo, TraderPerformance, TraderStatistics } from './types'
-import { fetchLeaderboard, fetchTraderHistory, fetchTraderPerformance, fetchTraderStatistics } from './utils'
+import { from, map, toArray } from 'rxjs'
+import { FilterTraderConfig, LeaderHistory, TraderInfo, TraderPerformance, TraderStatistics } from './types'
+import { fetchLeaderboard, fetchTraderHistory, fetchTraderPerformance, fetchTraderStatistics, filterKRatio } from './utils'
 import regression, { DataPoint } from 'regression'
 
 function calculateKRatio(cumulativeReturns: number[]): number {
@@ -25,6 +26,10 @@ function calculateKRatio(cumulativeReturns: number[]): number {
 
 export default class TycoonScanner {
   private tradersMap: Map<string, TraderInfo> = new Map<string, TraderInfo>()
+  private config: FilterTraderConfig = {
+    numOfTraders: 10,
+    kRatio: 100
+  }
 
   public async init() {
     await this.scanTycoonTraders()
@@ -69,7 +74,18 @@ export default class TycoonScanner {
     }
   }
 
-  public filterTopPerformers(topN: number = 10) {}
+  public filterTopPerformers(): void {
+    from(Array.from(this.tradersMap.values()))
+      .pipe(
+        filterKRatio(this.config.kRatio),
+        toArray(),
+        map((traders) => traders.sort((a, b) => b.computedStats.kRatio - a.computedStats.kRatio)),
+        map((traders) => traders.slice(0, this.config.numOfTraders))
+      )
+      .subscribe((topTraders) => {
+        console.log(topTraders)
+      })
+  }
 
   debug(): void {
     this.tradersMap.forEach((traderInfo, id) => {

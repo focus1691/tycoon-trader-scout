@@ -1,3 +1,4 @@
+export * from './config.types'
 export * from './leaderboard.responses.types'
 export * from './trader.types'
 export * from './trader.responses.types'
