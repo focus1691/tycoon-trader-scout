@@ -55,6 +55,7 @@ export default class TycoonScanner {
     await this.cacheService.connect()
     await this.scanTycoonTraders()
     this.filterTopPerformers()
+    this.debug()
   }
 
   private calcCustomStats(id: string, performance: TraderPerformance[]): void {
@@ -65,7 +66,6 @@ export default class TycoonScanner {
       id,
       kRatio
     }
-    console.log(kRatio)
 
     this.customStats.set(id, stats)
   }
@@ -124,7 +124,6 @@ export default class TycoonScanner {
       )
       .subscribe((topTraders) => {
         this.filteredTraderIds = topTraders.map((trader) => trader.id)
-        this.debug()
       })
   }
 
