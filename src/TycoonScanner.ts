@@ -1,7 +1,7 @@
 import { from, map, toArray } from 'rxjs'
 import { CacheService } from './redis'
 import { FilterTraderConfig, LeaderboardEntry, LeaderboardResponse, QuantStats, TraderInfo, TraderPerformance } from './types'
-import { fetchLeaderboard, fetchTraderHistory, fetchTraderPerformance, fetchTraderStatistics, filterKRatio, rateLimitedRequest } from './utils'
+import { fetchLeaderboard, fetchTraderHistory, fetchTraderPerformance, fetchTraderStatistics, filterKRatio } from './utils'
 import regression from 'regression'
 import { RateLimiter } from './RateLimiter'
 
