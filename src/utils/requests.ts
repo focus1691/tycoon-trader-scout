@@ -1,9 +1,9 @@
-import { BASE_URL } from '../config'
+import { BASE_URL, TOTAL_TRADERS } from '../constants'
 import { LeaderboardResponse, LeaderHistory, TraderPerformance, TraderStatistics } from '../types'
 
 // Fetch leaderboard and return a list of trader IDs
-export async function fetchLeaderboard(): Promise<string[]> {
-  const url = `${BASE_URL}/LeaderboardApi/GetLeaderboard?statsType=PNL&periodType=weekly&topCount=10&search=&leaderType=Public&skipLeaderCount=10&allTimeProfitable=true&atleastTrackingMonth=0&pnlHigherThan=0&noOfTradesLast7days=0&winRate=0&sort=Weekly&direction=desc`
+export async function fetchLeaderboard(): Promise<LeaderboardResponse> {
+  const url = `${BASE_URL}/LeaderboardApi/GetLeaderboard?statsType=PNL&periodType=weekly&topCount=${TOTAL_TRADERS}&search=&leaderType=Public&skipLeaderCount=10&allTimeProfitable=true&atleastTrackingMonth=0&pnlHigherThan=0&noOfTradesLast7days=0&winRate=0&sort=Weekly&direction=desc`
 
   const response = await fetch(url, {
     method: 'GET',
@@ -14,7 +14,8 @@ export async function fetchLeaderboard(): Promise<string[]> {
   })
 
   const data: LeaderboardResponse = await response.json()
-  return data.leaderBoard.entries.map((entry) => entry.id)
+
+  return data
 }
 
 // Fetch and return trader performance by ID

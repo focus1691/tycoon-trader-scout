@@ -1,11 +1,10 @@
-import { LeaderHistory, TraderPerformance, TraderStatistics } from '.'
+import { LeaderboardEntry, LeaderHistory, TraderPerformance, TraderStatistics } from '.'
 
 export interface TraderInfo {
-  id: string
+  entry: LeaderboardEntry
   performance: TraderPerformance[]
   statistics: TraderStatistics
   history: LeaderHistory
-  computedStats: QuantStats
 }
 
 export type QuantStats = {

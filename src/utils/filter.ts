@@ -1,6 +1,6 @@
 import { Observable, filter } from 'rxjs'
-import { TraderInfo } from '../types'
+import { QuantStats } from '../types'
 
 export function filterKRatio(minKRatio: number) {
-  return (source: Observable<TraderInfo>) => source.pipe(filter((trader) => trader.computedStats.kRatio >= minKRatio))
+  return (source: Observable<QuantStats>) => source.pipe(filter((stats) => stats.kRatio >= minKRatio))
 }
