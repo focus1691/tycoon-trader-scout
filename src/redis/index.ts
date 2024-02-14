@@ -17,7 +17,6 @@ export class CacheService {
 
   public async getData(key: string): Promise<any> {
     try {
-      console.log(this.redis)
       const data = await this.redis.json.get(key)
       return data
     } catch (e) {

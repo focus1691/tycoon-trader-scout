@@ -1,8 +1,9 @@
 import { from, map, toArray } from 'rxjs'
 import { CacheService } from './redis'
-import { FilterTraderConfig, LeaderboardEntry, LeaderboardResponse, LeaderHistory, QuantStats, TraderInfo, TraderPerformance, TraderStatistics } from './types'
-import { fetchLeaderboard, fetchTraderHistory, fetchTraderPerformance, fetchTraderStatistics, filterKRatio } from './utils'
+import { FilterTraderConfig, LeaderboardEntry, LeaderboardResponse, QuantStats, TraderInfo, TraderPerformance } from './types'
+import { fetchLeaderboard, fetchTraderHistory, fetchTraderPerformance, fetchTraderStatistics, filterKRatio, rateLimitedRequest } from './utils'
 import regression from 'regression'
+import { RateLimiter } from './RateLimiter'
 
 function calculateKRatio(cumulativeReturns: number[]): number {
   // Correctly type the data as an array of DataPoint
@@ -39,11 +40,15 @@ function calculateKRatio(cumulativeReturns: number[]): number {
 export default class TycoonScanner {
   private tradersMap: Map<string, TraderInfo> = new Map<string, TraderInfo>()
   private customStats: Map<string, QuantStats> = new Map<string, QuantStats>()
+
   private cacheService = new CacheService()
+
   private config: FilterTraderConfig = {
     limit: 10,
     minKRatio: 100
   }
+
+  private rateLimiter = new RateLimiter(50)
 
   public async init() {
     await this.cacheService.connect()
@@ -72,43 +77,38 @@ export default class TycoonScanner {
   }
 
   async scanTycoonTraders(): Promise<void> {
+    console.time('scanTycoonTraders')
     const data: LeaderboardResponse = await fetchLeaderboard()
 
-    for (let i = 0; i < data.leaderBoard.entries.length; i++) {
+    const totalEntries: number = data.leaderBoard.entries.length
+
+    for (let i = 0; i < totalEntries; i++) {
       const entry: LeaderboardEntry = data.leaderBoard.entries[i]
       const cacheKey = `tycoon-id:${entry.id}`
       let traderInfo: TraderInfo
 
-      // Check if the data exists in cache
+      console.log(`Processing entry ${i + 1}/${totalEntries}`)
+
       const cachedData = await this.cacheService.getData(cacheKey)
       if (cachedData) {
         console.log(`Data for ${cacheKey} found in cache.`)
         traderInfo = cachedData
       } else {
-        // Fetch data since it's not in the cache
-        const performance: TraderPerformance[] = await fetchTraderPerformance(entry.id)
-        const statistics: TraderStatistics = await fetchTraderStatistics(entry.id)
-        const history: LeaderHistory = await fetchTraderHistory(entry.id)
+        // Schedule each request through the rate limiter
+        const performance = await this.rateLimiter.schedule(() => fetchTraderPerformance(entry.id))
+        const statistics = await this.rateLimiter.schedule(() => fetchTraderStatistics(entry.id))
+        const history = await this.rateLimiter.schedule(() => fetchTraderHistory(entry.id))
 
-        traderInfo = {
-          entry,
-          performance,
-          statistics,
-          history
-        }
-
-        // Store the fetched data in cache
+        traderInfo = { entry, performance, statistics, history }
         await this.cacheService.setData(cacheKey, traderInfo)
       }
 
-      // Load trader info into memory and calculate custom stats
-      // These operations are performed regardless of data origin (API or cache)
       this.tradersMap.set(entry.id, traderInfo)
-      // Need to ensure performance data is available for calculation
-      // If data was from cache, extract the performance data for calcCustomStats
       const performanceData = traderInfo.performance ? traderInfo.performance : []
       this.calcCustomStats(entry.id, performanceData)
     }
+
+    console.timeEnd('scanTycoonTraders')
   }
 
   public filterTopPerformers(): void {

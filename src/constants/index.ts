@@ -1,3 +1,3 @@
 export const BASE_URL = 'https://platform-api.tycoon.io'
 
-export const TOTAL_TRADERS = 3
+export const TOTAL_TRADERS = 1444
