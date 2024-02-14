@@ -8,5 +8,6 @@ export interface TraderInfo {
 }
 
 export type QuantStats = {
+  id: string
   kRatio: number
 }

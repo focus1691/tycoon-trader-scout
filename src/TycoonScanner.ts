@@ -40,12 +40,13 @@ function calculateKRatio(cumulativeReturns: number[]): number {
 export default class TycoonScanner {
   private tradersMap: Map<string, TraderInfo> = new Map<string, TraderInfo>()
   private customStats: Map<string, QuantStats> = new Map<string, QuantStats>()
+  private filteredTraderIds: string[] = []
 
   private cacheService = new CacheService()
 
   private config: FilterTraderConfig = {
     limit: 10,
-    minKRatio: 100
+    minKRatio: 5
   }
 
   private rateLimiter = new RateLimiter(50)
@@ -53,7 +54,7 @@ export default class TycoonScanner {
   public async init() {
     await this.cacheService.connect()
     await this.scanTycoonTraders()
-    this.debug()
+    this.filterTopPerformers()
   }
 
   private calcCustomStats(id: string, performance: TraderPerformance[]): void {
@@ -61,8 +62,10 @@ export default class TycoonScanner {
     const kRatio = calculateKRatio(cumulativeReturns)
 
     const stats: QuantStats = {
+      id,
       kRatio
     }
+    console.log(kRatio)
 
     this.customStats.set(id, stats)
   }
@@ -120,22 +123,23 @@ export default class TycoonScanner {
         map((traders) => traders.slice(0, this.config.limit))
       )
       .subscribe((topTraders) => {
-        console.log(topTraders)
+        this.filteredTraderIds = topTraders.map((trader) => trader.id)
+        this.debug()
       })
   }
 
   debug(): void {
-    this.tradersMap.forEach((traderInfo, id) => {
+    this.filteredTraderIds.forEach((id) => {
       console.log(`Trader ID: ${id}`)
-      console.log(`Total Trades: ${traderInfo.statistics.totalTrades}`)
-      console.log(`Profitable Days: ${traderInfo.statistics.profitableDays}`)
-      console.log(`Highest Trade ROI: ${traderInfo.statistics.highestTradeROI}`)
-      console.log(`Highest Trade PNL: ${traderInfo.statistics.highestTradePNL}`)
-      console.log(`Trades Per Day: ${traderInfo.statistics.tradesPerDay}`)
-      console.log(`Win Ratio: ${traderInfo.statistics.winRatio}`)
-      console.log(`Average Trading Size: ${traderInfo.statistics.avgTradingSize}`)
-      console.log(`Average Trade Duration: ${traderInfo.statistics.avgTradeDuration}`)
-      console.log(`Biggest Trade Loss: ${traderInfo.statistics.biggestTradeLoss}`)
+      console.log(`Total Trades: ${this.tradersMap.get(id)?.statistics.totalTrades}`)
+      console.log(`Profitable Days: ${this.tradersMap.get(id)?.statistics.profitableDays}`)
+      console.log(`Highest Trade ROI: ${this.tradersMap.get(id)?.statistics.highestTradeROI}`)
+      console.log(`Highest Trade PNL: ${this.tradersMap.get(id)?.statistics.highestTradePNL}`)
+      console.log(`Trades Per Day: ${this.tradersMap.get(id)?.statistics.tradesPerDay}`)
+      console.log(`Win Ratio: ${this.tradersMap.get(id)?.statistics.winRatio}`)
+      console.log(`Average Trading Size: ${this.tradersMap.get(id)?.statistics.avgTradingSize}`)
+      console.log(`Average Trade Duration: ${this.tradersMap.get(id)?.statistics.avgTradeDuration}`)
+      console.log(`Biggest Trade Loss: ${this.tradersMap.get(id)?.statistics.biggestTradeLoss}`)
       console.log(`K-Ratio: ${this.customStats.get(id)?.kRatio}`)
       console.log('------------------------------------------')
     })
