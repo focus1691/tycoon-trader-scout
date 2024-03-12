@@ -1,4 +1,5 @@
 # Tycoon Trader Scout
+For this platform: https://platform.tycoon.io
 
 ## Overview
 Retrieve and rank all Tycoon platform traders by top 10 K-ratio.
